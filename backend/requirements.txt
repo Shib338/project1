@@ -1,6 +1,0 @@
-fastapi
-uvicorn[standard]
-pandas
-google-generativeai
-python-multipart
-pydantic
