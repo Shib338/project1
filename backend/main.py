@@ -21,8 +21,8 @@ from google import genai as google_genai
 from dotenv import load_dotenv
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-client = google_genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WE = os.getenv("AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WE", "")
+client = google_genai.Client(api_key=AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WE) if AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WEelse None
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "sales_data.csv")
 uploaded_df: Optional[pd.DataFrame] = None
@@ -131,7 +131,7 @@ User Query: {request.query}
 
 Respond with ONLY the JSON object."""
 
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        response = client.models.generate_content(model="gemini-2.5-flash-preview-05-20", contents=prompt)
         raw_text = response.text.strip()
 
         # Extract JSON from response
