@@ -35,7 +35,7 @@ export default function Header({ uploadedFile }: HeaderProps) {
         >
           <Database size={12} style={{ color: "var(--accent)" }} />
           <span style={{ color: "var(--text-secondary)" }}>
-            {uploadedFile ? uploadedFile : "sales_data.csv"}
+            {uploadedFile ? uploadedFile : "No file uploaded"}
           </span>
           <span
             className="w-2 h-2 rounded-full"

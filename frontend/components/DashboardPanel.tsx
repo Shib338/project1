@@ -42,7 +42,7 @@ function EmptyState() {
         </p>
       </div>
       <div className="grid grid-cols-1 gap-2 w-full max-w-xs mt-2">
-        {["Monthly revenue trends", "Sales by region", "Top products by profit"].map((ex) => (
+        {["Top categories by views", "Engagement by region", "Videos by language"].map((ex) => (
           <div
             key={ex}
             className="text-xs px-3 py-2 rounded-lg"

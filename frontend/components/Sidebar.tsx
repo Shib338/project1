@@ -3,12 +3,12 @@ import { useRef } from "react";
 import { Upload, RotateCcw, Sparkles, FileText } from "lucide-react";
 
 const SUGGESTED_QUERIES = [
-  "Show monthly revenue trends for 2024",
-  "Compare sales by region with a bar chart",
-  "Which product category has the highest profit?",
-  "Top 5 products by revenue",
-  "Show Q3 sales breakdown by region",
-  "Compare Electronics vs Furniture revenue",
+  "Show overall revenue summary",
+  "Which category has the highest sales?",
+  "Show top 5 products by revenue",
+  "Compare sales across all regions",
+  "Show monthly trends",
+  "What are the key insights from this data?",
 ];
 
 interface SidebarProps {
@@ -22,7 +22,10 @@ export default function Sidebar({ uploadedFile, onUpload, onReset }: SidebarProp
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onUpload(file);
+    if (file) {
+      onUpload(file);
+      e.target.value = "";
+    }
   };
 
   return (
@@ -57,7 +60,7 @@ export default function Sidebar({ uploadedFile, onUpload, onReset }: SidebarProp
             style={{ color: "var(--text-secondary)" }}
           >
             <FileText size={16} className="mx-auto mb-1" style={{ color: "var(--accent)" }} />
-            Using default sales dataset
+            No data uploaded yet
           </div>
         )}
 
@@ -66,9 +69,12 @@ export default function Sidebar({ uploadedFile, onUpload, onReset }: SidebarProp
           className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
           style={{ background: "var(--accent)", color: "white" }}
         >
-          <Upload size={13} /> Upload Your CSV
+          <Upload size={13} /> Upload Your File
         </button>
-        <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
+        <p className="text-xs mt-2 text-center" style={{ color: "var(--text-secondary)" }}>
+          Select a .csv or .xlsx <strong>file</strong>, not a folder
+        </p>
+        <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden" onChange={handleFile} />
       </div>
 
       <div className="p-4 flex-1">

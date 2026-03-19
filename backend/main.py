@@ -7,6 +7,10 @@ import json
 import re
 import io
 from typing import Optional
+from google import genai as google_genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="QueryViz AI API")
 
@@ -17,12 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from google import genai as google_genai
-from dotenv import load_dotenv
-load_dotenv()
-
-AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WE = os.getenv("AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WE", "")
-client = google_genai.Client(api_key=AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WE) if AIzaSyD7-T_BD900ahyj8SgxPe1_eIqHf1Ej0WEelse None
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+client = google_genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "sales_data.csv")
 uploaded_df: Optional[pd.DataFrame] = None
@@ -104,11 +104,9 @@ class QueryRequest(BaseModel):
 async def process_query(request: QueryRequest):
     try:
         if not client:
-            raise HTTPException(status_code=401, detail="Gemini API key not set. Please set the GEMINI_API_KEY environment variable and restart the server.")
+            raise HTTPException(status_code=401, detail="Gemini API key not set. Please set the GEMINI_API_KEY environment variable.")
         df = get_dataframe()
         schema = get_data_schema(df)
-
-        # Prepare a sample of data for Gemini (limit to avoid token overflow)
         data_sample = df.head(100).to_json(orient="records")
 
         conversation_context = ""
@@ -131,10 +129,9 @@ User Query: {request.query}
 
 Respond with ONLY the JSON object."""
 
-        response = client.models.generate_content(model="gemini-2.5-flash-preview-05-20", contents=prompt)
+        response = client.models.generate_content(model="gemini-2.0-flash-lite", contents=prompt)
         raw_text = response.text.strip()
 
-        # Extract JSON from response
         json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
         if not json_match:
             raise ValueError("No JSON found in response")
