@@ -33,7 +33,8 @@ export default function Home() {
     conversationHistory.current.push({ role: "user", content: query });
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/query`, {
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,7 +80,8 @@ export default function Home() {
   const handleUpload = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const res = await fetch(`${API}/api/upload`, {
       method: "POST",
       body: formData,
     });
@@ -99,7 +101,8 @@ export default function Home() {
   };
 
   const handleReset = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, { method: "DELETE" });
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    await fetch(`${API}/api/upload`, { method: "DELETE" });
     setUploadedFile(null);
     setDashboard(null);
     conversationHistory.current = [];
