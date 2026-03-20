@@ -19,12 +19,24 @@
   --gradient: linear-gradient(135deg, #7c3aed, #06b6d4);
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
+html,
 body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Next.js root div */
+body > div:first-child,
+#__next {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 /* ── Scrollbar ── */
