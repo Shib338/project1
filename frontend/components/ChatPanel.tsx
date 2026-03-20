@@ -38,12 +38,15 @@ export default function ChatPanel({ messages, loading, onSendQuery }: ChatPanelP
 
   return (
     <div
-      className="flex flex-col border-r"
       style={{
         width: "380px",
         minWidth: "320px",
-        borderColor: "var(--border)",
+        display: "flex",
+        flexDirection: "column",
+        borderRight: "1px solid var(--border)",
         background: "linear-gradient(180deg, #0d1424 0%, #0a1020 100%)",
+        height: "100%",
+        overflow: "hidden",
       }}
     >
       {/* Messages */}

@@ -143,7 +143,7 @@ function LoadingState() {
 export default function DashboardPanel({ dashboard, loading }: DashboardPanelProps) {
   if (loading) {
     return (
-      <div className="flex-1 overflow-y-auto" style={{ background: "var(--bg-primary)" }}>
+      <div style={{ flex: 1, overflowY: "auto", background: "var(--bg-primary)" }}>
         <LoadingState />
       </div>
     );
@@ -151,14 +151,14 @@ export default function DashboardPanel({ dashboard, loading }: DashboardPanelPro
 
   if (!dashboard) {
     return (
-      <div className="flex-1 overflow-y-auto" style={{ background: "var(--bg-primary)" }}>
+      <div style={{ flex: 1, overflowY: "auto", background: "var(--bg-primary)" }}>
         <EmptyState />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6" style={{ background: "var(--bg-primary)" }}>
+    <div style={{ flex: 1, overflowY: "auto", padding: "24px", background: "var(--bg-primary)" }}>
       {/* Title */}
       <div className="mb-5 animate-fade-in">
         <h2 className="text-xl font-bold gradient-text">{dashboard.title}</h2>

@@ -124,32 +124,19 @@ export default function Home() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "var(--bg-primary)", position: "relative" }}>
-      {/* Ambient background orbs */}
-      <div
-        style={{
-          position: "absolute", top: "-120px", left: "-80px",
-          width: "400px", height: "400px", borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)",
-          pointerEvents: "none", zIndex: 0,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute", bottom: "-100px", right: "200px",
-          width: "350px", height: "350px", borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)",
-          pointerEvents: "none", zIndex: 0,
-        }}
-      />
-      <div style={{ position: "relative", zIndex: 1, display: "flex", flex: 1, height: "100%", overflow: "hidden" }}>
-        <Sidebar uploadedFile={uploadedFile} onUpload={handleUpload} onReset={handleReset} />
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
-          <Header uploadedFile={uploadedFile} />
-          <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-            <ChatPanel messages={messages} loading={loading} onSendQuery={sendQuery} />
-            <DashboardPanel dashboard={dashboard} loading={loading} />
-          </div>
+    <div style={{
+      position: "fixed",
+      top: 0, left: 0, right: 0, bottom: 0,
+      display: "flex",
+      background: "var(--bg-primary)",
+      overflow: "hidden",
+    }}>
+      <Sidebar uploadedFile={uploadedFile} onUpload={handleUpload} onReset={handleReset} />
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", minWidth: 0 }}>
+        <Header uploadedFile={uploadedFile} />
+        <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
+          <ChatPanel messages={messages} loading={loading} onSendQuery={sendQuery} />
+          <DashboardPanel dashboard={dashboard} loading={loading} />
         </div>
       </div>
     </div>

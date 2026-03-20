@@ -27,10 +27,15 @@ export default function Sidebar({ uploadedFile, onUpload, onReset }: SidebarProp
 
   return (
     <aside
-      className="w-64 flex flex-col border-r overflow-y-auto"
       style={{
+        width: "256px",
+        minWidth: "256px",
+        display: "flex",
+        flexDirection: "column",
+        borderRight: "1px solid var(--border)",
+        overflowY: "auto",
         background: "linear-gradient(180deg, #0d1424 0%, #0a1020 100%)",
-        borderColor: "var(--border)",
+        height: "100%",
       }}
     >
       {/* Data Source section */}
