@@ -1,5 +1,5 @@
 "use client";
-import { Brain, Database } from "lucide-react";
+import { Brain, Database, Zap, Circle } from "lucide-react";
 
 interface HeaderProps {
   uploadedFile: string | null;
@@ -9,17 +9,25 @@ export default function Header({ uploadedFile }: HeaderProps) {
   return (
     <header
       className="flex items-center justify-between px-6 py-3 border-b"
-      style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
+      style={{
+        borderColor: "var(--border)",
+        background: "linear-gradient(90deg, #0d1424 0%, #0f1a30 50%, #0d1424 100%)",
+        backdropFilter: "blur(12px)",
+      }}
     >
+      {/* Logo */}
       <div className="flex items-center gap-3">
         <div
-          className="flex items-center justify-center w-8 h-8 rounded-lg"
-          style={{ background: "var(--accent)" }}
+          className="flex items-center justify-center w-9 h-9 rounded-xl"
+          style={{
+            background: "linear-gradient(135deg, #7c3aed, #06b6d4)",
+            boxShadow: "0 0 20px rgba(124,58,237,0.5)",
+          }}
         >
-          <Brain size={16} color="white" />
+          <Brain size={17} color="white" />
         </div>
         <div>
-          <h1 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
+          <h1 className="font-bold text-sm gradient-text" style={{ letterSpacing: "0.02em" }}>
             QueryViz AI
           </h1>
           <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
@@ -28,18 +36,38 @@ export default function Header({ uploadedFile }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      {/* Right badges */}
+      <div className="flex items-center gap-3">
+        {/* Gemini badge */}
+        <div
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+          style={{
+            background: "rgba(124,58,237,0.12)",
+            border: "1px solid rgba(124,58,237,0.35)",
+            color: "#a78bfa",
+          }}
+        >
+          <Zap size={11} />
+          Gemini 2.5 Flash
+        </div>
+
+        {/* File badge */}
         <div
           className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs"
-          style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+          style={{
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            color: "var(--text-secondary)",
+          }}
         >
-          <Database size={12} style={{ color: "var(--accent)" }} />
-          <span style={{ color: "var(--text-secondary)" }}>
-            {uploadedFile ? uploadedFile : "No file uploaded"}
+          <Database size={11} style={{ color: "var(--accent2)" }} />
+          <span className="max-w-[160px] truncate">
+            {uploadedFile ?? "No file uploaded"}
           </span>
-          <span
-            className="w-2 h-2 rounded-full"
-            style={{ background: "var(--success)" }}
+          <Circle
+            size={7}
+            fill={uploadedFile ? "var(--success)" : "var(--text-secondary)"}
+            style={{ color: uploadedFile ? "var(--success)" : "var(--text-secondary)" }}
           />
         </div>
       </div>

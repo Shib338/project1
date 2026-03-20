@@ -124,13 +124,32 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg-primary)" }}>
-      <Sidebar uploadedFile={uploadedFile} onUpload={handleUpload} onReset={handleReset} />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Header uploadedFile={uploadedFile} />
-        <div className="flex flex-1 overflow-hidden">
-          <ChatPanel messages={messages} loading={loading} onSendQuery={sendQuery} />
-          <DashboardPanel dashboard={dashboard} loading={loading} />
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg-primary)", position: "relative" }}>
+      {/* Ambient background orbs */}
+      <div
+        style={{
+          position: "absolute", top: "-120px", left: "-80px",
+          width: "400px", height: "400px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)",
+          pointerEvents: "none", zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute", bottom: "-100px", right: "200px",
+          width: "350px", height: "350px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)",
+          pointerEvents: "none", zIndex: 0,
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 1, display: "flex", width: "100%", overflow: "hidden" }}>
+        <Sidebar uploadedFile={uploadedFile} onUpload={handleUpload} onReset={handleReset} />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Header uploadedFile={uploadedFile} />
+          <div className="flex flex-1 overflow-hidden">
+            <ChatPanel messages={messages} loading={loading} onSendQuery={sendQuery} />
+            <DashboardPanel dashboard={dashboard} loading={loading} />
+          </div>
         </div>
       </div>
     </div>

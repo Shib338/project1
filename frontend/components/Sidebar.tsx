@@ -1,14 +1,14 @@
 "use client";
 import { useRef } from "react";
-import { Upload, RotateCcw, Sparkles, FileText } from "lucide-react";
+import { Upload, RotateCcw, Sparkles, FileText, ChevronRight } from "lucide-react";
 
 const SUGGESTED_QUERIES = [
-  "Show overall revenue summary",
-  "Which category has the highest sales?",
-  "Show top 5 products by revenue",
-  "Compare sales across all regions",
-  "Show monthly trends",
-  "What are the key insights from this data?",
+  "Show views by category",
+  "Compare likes and comments by region",
+  "Top 5 categories by total views",
+  "Videos by language distribution",
+  "Sentiment score trends over time",
+  "Which region has highest engagement?",
 ];
 
 interface SidebarProps {
@@ -22,85 +22,114 @@ export default function Sidebar({ uploadedFile, onUpload, onReset }: SidebarProp
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      onUpload(file);
-      e.target.value = "";
-    }
+    if (file) { onUpload(file); e.target.value = ""; }
   };
 
   return (
     <aside
       className="w-64 flex flex-col border-r overflow-y-auto"
-      style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}
+      style={{
+        background: "linear-gradient(180deg, #0d1424 0%, #0a1020 100%)",
+        borderColor: "var(--border)",
+      }}
     >
+      {/* Data Source section */}
       <div className="p-4 border-b" style={{ borderColor: "var(--border)" }}>
-        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+        <p
+          className="text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: "var(--accent2)", boxShadow: "0 0 6px var(--accent2)" }}
+          />
           Data Source
         </p>
 
         {uploadedFile ? (
-          <div className="glass-card p-3 mb-3">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText size={14} style={{ color: "var(--accent)" }} />
-              <span className="text-xs truncate" style={{ color: "var(--text-primary)" }}>
+          <div
+            className="gradient-border p-3 mb-3"
+            style={{ background: "var(--bg-card)" }}
+          >
+            <div className="flex items-center gap-2 mb-2.5">
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.3)" }}
+              >
+                <FileText size={13} style={{ color: "var(--accent2)" }} />
+              </div>
+              <span className="text-xs truncate font-medium" style={{ color: "var(--text-primary)" }}>
                 {uploadedFile}
               </span>
             </div>
             <button
               onClick={onReset}
-              className="flex items-center gap-1 text-xs w-full justify-center py-1.5 rounded-lg transition-colors"
-              style={{ color: "var(--danger)", border: "1px solid var(--danger)" }}
+              className="flex items-center gap-1.5 text-xs w-full justify-center py-1.5 rounded-lg transition-all hover:bg-red-500/10"
+              style={{ color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)" }}
             >
-              <RotateCcw size={12} /> Reset to Default
+              <RotateCcw size={11} /> Remove File
             </button>
           </div>
         ) : (
           <div
-            className="glass-card p-3 mb-3 text-center text-xs"
-            style={{ color: "var(--text-secondary)" }}
+            className="p-3 mb-3 rounded-xl text-center"
+            style={{
+              background: "rgba(124,58,237,0.06)",
+              border: "1px dashed rgba(124,58,237,0.3)",
+            }}
           >
-            <FileText size={16} className="mx-auto mb-1" style={{ color: "var(--accent)" }} />
-            No data uploaded yet
+            <FileText size={18} className="mx-auto mb-1.5" style={{ color: "var(--accent)" }} />
+            <p className="text-xs" style={{ color: "var(--text-secondary)" }}>No data uploaded yet</p>
           </div>
         )}
 
         <button
           onClick={() => fileRef.current?.click()}
-          className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
-          style={{ background: "var(--accent)", color: "white" }}
+          className="btn-gradient flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs"
         >
-          <Upload size={13} /> Upload Your File
+          <Upload size={13} /> Upload CSV / Excel
         </button>
-        <p className="text-xs mt-2 text-center" style={{ color: "var(--text-secondary)" }}>
-          Select a .csv or .xlsx <strong>file</strong>, not a folder
+        <p className="text-xs mt-2 text-center" style={{ color: "var(--text-secondary)", opacity: 0.7 }}>
+          .csv, .xlsx, .xls — not a folder
         </p>
         <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden" onChange={handleFile} />
       </div>
 
+      {/* Suggested Queries */}
       <div className="p-4 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
-          <Sparkles size={12} className="inline mr-1" />
-          Suggested Queries
+        <p
+          className="text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          <Sparkles size={11} style={{ color: "var(--accent)" }} />
+          Try These
         </p>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           {SUGGESTED_QUERIES.map((q, i) => (
             <button
               key={i}
-              className="text-left text-xs p-2.5 rounded-lg transition-all hover:border-indigo-500"
-              style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border)",
-                color: "var(--text-secondary)",
-              }}
-              onClick={() => {
-                const event = new CustomEvent("suggested-query", { detail: q });
-                window.dispatchEvent(event);
-              }}
+              className="query-btn flex items-center justify-between group"
+              onClick={() => window.dispatchEvent(new CustomEvent("suggested-query", { detail: q }))}
             >
-              {q}
+              <span>{q}</span>
+              <ChevronRight
+                size={12}
+                className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                style={{ color: "var(--accent)" }}
+              />
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Footer */}
+      <div
+        className="p-4 border-t text-center"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <p className="text-xs" style={{ color: "var(--text-secondary)", opacity: 0.5 }}>
+          Powered by Google Gemini AI
+        </p>
       </div>
     </aside>
   );
