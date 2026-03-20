@@ -9,11 +9,28 @@ interface ChatPanelProps {
   onSendQuery: (query: string) => void;
 }
 
-function renderMarkdown(text: string) {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/\n/g, "<br/>");
+// basic markdown — bold and italic only, no dangerouslySetInnerHTML
+function MsgText({ text }: { text: string }) {
+  // split on **bold** and *italic* tokens
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**"))
+          return <strong key={i}>{part.slice(2, -2)}</strong>;
+        if (part.startsWith("*") && part.endsWith("*"))
+          return <em key={i}>{part.slice(1, -1)}</em>;
+        // handle newlines
+        return (
+          <span key={i}>
+            {part.split("\n").map((line, j, arr) => (
+              <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
+            ))}
+          </span>
+        );
+      })}
+    </>
+  );
 }
 
 export default function ChatPanel({ messages, loading, onSendQuery }: ChatPanelProps) {
@@ -49,17 +66,20 @@ export default function ChatPanel({ messages, loading, onSendQuery }: ChatPanelP
         overflow: "hidden",
       }}
     >
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-        {messages.map((msg) => (
+      {/* messages list */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+        {messages.map(msg => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+            className="animate-fade-in"
+            style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}
           >
             {msg.role === "assistant" && (
               <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mr-2 mt-0.5"
                 style={{
+                  width: "28px", height: "28px", borderRadius: "8px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0, marginRight: "8px", marginTop: "2px",
                   background: "linear-gradient(135deg, #7c3aed, #06b6d4)",
                   boxShadow: "0 0 12px rgba(124,58,237,0.4)",
                 }}
@@ -69,16 +89,17 @@ export default function ChatPanel({ messages, loading, onSendQuery }: ChatPanelP
             )}
 
             <div
-              className="max-w-[82%] px-4 py-3 text-sm"
               style={
                 msg.role === "user"
                   ? {
+                      maxWidth: "82%", padding: "10px 14px", fontSize: "14px",
                       background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
                       color: "white",
                       borderRadius: "18px 18px 4px 18px",
                       boxShadow: "0 4px 20px rgba(124,58,237,0.35)",
                     }
                   : {
+                      maxWidth: "82%", padding: "10px 14px", fontSize: "14px",
                       background: msg.isError ? "rgba(239,68,68,0.08)" : "var(--bg-card)",
                       border: `1px solid ${msg.isError ? "rgba(239,68,68,0.4)" : "var(--border)"}`,
                       color: "var(--text-primary)",
@@ -86,13 +107,14 @@ export default function ChatPanel({ messages, loading, onSendQuery }: ChatPanelP
                     }
               }
             >
-              <div dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+              <MsgText text={msg.content} />
               {msg.hasDashboard && (
                 <div
-                  className="flex items-center gap-1.5 mt-2 pt-2 text-xs font-medium"
                   style={{
+                    display: "flex", alignItems: "center", gap: "6px",
+                    marginTop: "8px", paddingTop: "8px",
                     borderTop: "1px solid var(--border)",
-                    color: "var(--accent2)",
+                    color: "var(--accent2)", fontSize: "12px", fontWeight: 500,
                   }}
                 >
                   <BarChart2 size={11} /> Dashboard updated →
@@ -103,10 +125,12 @@ export default function ChatPanel({ messages, loading, onSendQuery }: ChatPanelP
         ))}
 
         {loading && (
-          <div className="flex justify-start animate-fade-in">
+          <div className="animate-fade-in" style={{ display: "flex", justifyContent: "flex-start" }}>
             <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mr-2 mt-0.5"
               style={{
+                width: "28px", height: "28px", borderRadius: "8px",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, marginRight: "8px",
                 background: "linear-gradient(135deg, #7c3aed, #06b6d4)",
                 animation: "pulse-glow 2s infinite",
               }}
@@ -114,48 +138,48 @@ export default function ChatPanel({ messages, loading, onSendQuery }: ChatPanelP
               <Sparkles size={13} color="white" />
             </div>
             <div
-              className="px-4 py-3 flex items-center gap-1.5"
               style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border)",
+                padding: "10px 14px", display: "flex", alignItems: "center", gap: "6px",
+                background: "var(--bg-card)", border: "1px solid var(--border)",
                 borderRadius: "18px 18px 18px 4px",
               }}
             >
-              <span className="typing-dot w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
-              <span className="typing-dot w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
-              <span className="typing-dot w-2 h-2 rounded-full" style={{ background: "var(--accent)" }} />
+              <span className="typing-dot" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
+              <span className="typing-dot" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
+              <span className="typing-dot" style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t" style={{ borderColor: "var(--border)" }}>
+      {/* input bar */}
+      <div style={{ padding: "16px", borderTop: "1px solid var(--border)" }}>
         <div
-          className="flex items-center gap-2 rounded-2xl px-4 py-2.5 transition-all"
           style={{
-            background: "var(--bg-card)",
-            border: "1px solid var(--border-bright)",
-            boxShadow: "0 0 0 0 transparent",
+            display: "flex", alignItems: "center", gap: "8px",
+            borderRadius: "20px", padding: "8px 14px",
+            background: "var(--bg-card)", border: "1px solid var(--border-bright)",
           }}
-          onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 2px rgba(124,58,237,0.3)")}
-          onBlur={(e) => (e.currentTarget.style.boxShadow = "0 0 0 0 transparent")}
         >
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSend()}
             placeholder="Ask about your data..."
-            className="flex-1 bg-transparent text-sm chat-input"
-            style={{ color: "var(--text-primary)" }}
+            className="chat-input"
+            style={{
+              flex: 1, background: "transparent", fontSize: "14px",
+              color: "var(--text-primary)", border: "none",
+            }}
             disabled={loading}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="btn-gradient flex items-center justify-center w-8 h-8 rounded-xl flex-shrink-0"
+            className="btn-gradient"
+            style={{ width: "32px", height: "32px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
           >
             <Send size={13} />
           </button>

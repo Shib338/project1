@@ -2,6 +2,7 @@
 import { useRef } from "react";
 import { Upload, RotateCcw, Sparkles, FileText, ChevronRight } from "lucide-react";
 
+// these are youtube-specific but work for any dataset really
 const SUGGESTED_QUERIES = [
   "Show views by category",
   "Compare likes and comments by region",
@@ -21,8 +22,8 @@ export default function Sidebar({ uploadedFile, onUpload, onReset }: SidebarProp
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) { onUpload(file); e.target.value = ""; }
+    const f = e.target.files?.[0];
+    if (f) { onUpload(f); e.target.value = ""; }
   };
 
   return (
@@ -38,103 +39,74 @@ export default function Sidebar({ uploadedFile, onUpload, onReset }: SidebarProp
         height: "100%",
       }}
     >
-      {/* Data Source section */}
-      <div className="p-4 border-b" style={{ borderColor: "var(--border)" }}>
-        <p
-          className="text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full"
-            style={{ background: "var(--accent2)", boxShadow: "0 0 6px var(--accent2)" }}
-          />
+      {/* upload section */}
+      <div style={{ padding: "16px", borderBottom: "1px solid var(--border)" }}>
+        <p style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-secondary)", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--accent2)", boxShadow: "0 0 6px var(--accent2)", display: "inline-block" }} />
           Data Source
         </p>
 
         {uploadedFile ? (
-          <div
-            className="gradient-border p-3 mb-3"
-            style={{ background: "var(--bg-card)" }}
-          >
-            <div className="flex items-center gap-2 mb-2.5">
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.3)" }}
-              >
+          <div className="gradient-border" style={{ background: "var(--bg-card)", padding: "12px", marginBottom: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+              <div style={{ width: "28px", height: "28px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.3)" }}>
                 <FileText size={13} style={{ color: "var(--accent2)" }} />
               </div>
-              <span className="text-xs truncate font-medium" style={{ color: "var(--text-primary)" }}>
+              <span style={{ fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--text-primary)", fontWeight: 500 }}>
                 {uploadedFile}
               </span>
             </div>
             <button
               onClick={onReset}
-              className="flex items-center gap-1.5 text-xs w-full justify-center py-1.5 rounded-lg transition-all hover:bg-red-500/10"
-              style={{ color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)" }}
+              style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", width: "100%", justifyContent: "center", padding: "6px", borderRadius: "8px", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)", background: "transparent", cursor: "pointer", transition: "background 0.2s" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
               <RotateCcw size={11} /> Remove File
             </button>
           </div>
         ) : (
-          <div
-            className="p-3 mb-3 rounded-xl text-center"
-            style={{
-              background: "rgba(124,58,237,0.06)",
-              border: "1px dashed rgba(124,58,237,0.3)",
-            }}
-          >
-            <FileText size={18} className="mx-auto mb-1.5" style={{ color: "var(--accent)" }} />
-            <p className="text-xs" style={{ color: "var(--text-secondary)" }}>No data uploaded yet</p>
+          <div style={{ padding: "12px", marginBottom: "12px", borderRadius: "12px", textAlign: "center", background: "rgba(124,58,237,0.06)", border: "1px dashed rgba(124,58,237,0.3)" }}>
+            <FileText size={18} style={{ color: "var(--accent)", margin: "0 auto 6px" }} />
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)" }}>No file uploaded yet</p>
           </div>
         )}
 
         <button
           onClick={() => fileRef.current?.click()}
-          className="btn-gradient flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs"
+          className="btn-gradient"
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", padding: "10px", borderRadius: "12px", fontSize: "12px" }}
         >
           <Upload size={13} /> Upload CSV / Excel
         </button>
-        <p className="text-xs mt-2 text-center" style={{ color: "var(--text-secondary)", opacity: 0.7 }}>
+        <p style={{ fontSize: "11px", marginTop: "8px", textAlign: "center", color: "var(--text-secondary)", opacity: 0.6 }}>
           .csv, .xlsx, .xls — not a folder
         </p>
-        <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden" onChange={handleFile} />
+        <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.txt" style={{ display: "none" }} onChange={handleFile} />
       </div>
 
-      {/* Suggested Queries */}
-      <div className="p-4 flex-1">
-        <p
-          className="text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5"
-          style={{ color: "var(--text-secondary)" }}
-        >
+      {/* suggested queries */}
+      <div style={{ padding: "16px", flex: 1 }}>
+        <p style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-secondary)", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
           <Sparkles size={11} style={{ color: "var(--accent)" }} />
           Try These
         </p>
-        <div className="flex flex-col gap-1.5">
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           {SUGGESTED_QUERIES.map((q, i) => (
             <button
               key={i}
-              className="query-btn flex items-center justify-between group"
+              className="query-btn"
               onClick={() => window.dispatchEvent(new CustomEvent("suggested-query", { detail: q }))}
             >
               <span>{q}</span>
-              <ChevronRight
-                size={12}
-                className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                style={{ color: "var(--accent)" }}
-              />
+              <ChevronRight size={12} style={{ color: "var(--accent)", flexShrink: 0, opacity: 0 }} className="chevron-icon" />
             </button>
           ))}
         </div>
       </div>
 
-      {/* Footer */}
-      <div
-        className="p-4 border-t text-center"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <p className="text-xs" style={{ color: "var(--text-secondary)", opacity: 0.5 }}>
-          Powered by Google Gemini AI
-        </p>
+      <div style={{ padding: "12px 16px", borderTop: "1px solid var(--border)", textAlign: "center" }}>
+        <p style={{ fontSize: "11px", color: "var(--text-secondary)", opacity: 0.45 }}>Powered by Google Gemini</p>
       </div>
     </aside>
   );

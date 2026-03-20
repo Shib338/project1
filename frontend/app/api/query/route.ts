@@ -1,96 +1,117 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const API_KEY = process.env.GEMINI_API_KEY || "";
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-const SYSTEM_PROMPT = `You are a Business Intelligence AI assistant. Analyze a dataset and answer natural language queries by generating chart configurations.
+// tried gemini-pro first but flash is faster and good enough for this
+const MODEL = "gemini-2.5-flash";
 
-Your response MUST be a valid JSON object with this exact structure:
+const SYSTEM_PROMPT = `You are a BI assistant. Given a dataset and a user question, return a JSON dashboard config.
+
+Return ONLY this JSON shape (no markdown, no explanation):
 {
-  "title": "Dashboard title",
-  "summary": "2-3 sentence plain English insight summary",
+  "title": "string",
+  "summary": "2-3 sentence insight",
   "charts": [
     {
-      "id": "chart_1",
-      "type": "line|bar|pie|area",
-      "title": "Chart title",
-      "description": "What this chart shows",
-      "xKey": "column_name_for_x_axis",
-      "yKey": "column_name_for_y_axis",
-      "nameKey": "column_name_for_labels",
-      "data": [{"key": "value"}],
-      "color": "#hex_color"
+      "id": "c1",
+      "type": "bar|line|pie|area",
+      "title": "string",
+      "description": "string",
+      "xKey": "exact_column_name",
+      "yKey": "exact_column_name",
+      "nameKey": "exact_column_name",
+      "data": [],
+      "color": "#hex"
     }
   ],
   "kpis": [
-    {
-      "label": "KPI name",
-      "value": "formatted value",
-      "trend": "up|down|neutral",
-      "change": "+12.5%"
-    }
+    { "label": "string", "value": "string", "trend": "up|down|neutral", "change": "string" }
   ]
 }
 
-Chart type rules:
-- line: time-series/trends
-- bar: category comparisons
-- pie: parts-of-whole (max 6 slices)
-- area: cumulative trends
+Rules:
+- use EXACT column names from the schema for xKey/yKey/nameKey
+- always return at least 1 chart, max 3
+- max 20 data points per chart
+- pie chart max 6 slices
+- always 2-4 kpis with real numbers
+- if query is vague just pick something useful to show
+- line = trends over time, bar = compare categories, pie = proportions, area = cumulative`;
 
-CRITICAL RULES:
-- ALWAYS generate at least 1 chart using the actual column names from the dataset
-- Use the EXACT column names from the schema as xKey, yKey, nameKey
-- If the user query is vague, pick the most relevant numeric column for yKey and text/date column for xKey
-- Aggregate data yourself if needed (sum, count, average by category)
-- NEVER return empty charts array - always find something useful to show
-- Always include 2-4 KPIs with real values calculated from the data
-- Max 3 charts, max 20 data points each
-- Return ONLY the JSON object, no markdown`;
-
-function csvToJson(csv: string): Record<string, unknown>[] {
+// parse csv rows, skip header, limit to 500 rows so we dont blow up the prompt
+function parseCSV(csv: string) {
   const lines = csv.trim().split("\n").filter(l => l.trim());
-  const delimiter = lines[0].includes("\t") ? "\t" : ",";
-  const headers = lines[0].split(delimiter).map(h => h.trim().replace(/^"|"$/g, ""));
-  return lines.slice(1, 501).map(line => {
-    const values = line.split(delimiter);
-    const obj: Record<string, unknown> = {};
+  const sep = lines[0].includes("\t") ? "\t" : ",";
+  const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ""));
+
+  const rows = lines.slice(1, 501).map(line => {
+    const vals = line.split(sep);
+    const row: Record<string, unknown> = {};
     headers.forEach((h, i) => {
-      const val = values[i]?.trim().replace(/^"|"$/g, "") || "";
-      obj[h] = val !== "" && !isNaN(Number(val)) ? Number(val) : val;
+      const v = vals[i]?.trim().replace(/^"|"$/g, "") ?? "";
+      row[h] = v !== "" && !isNaN(Number(v)) ? Number(v) : v;
     });
-    return obj;
-  }).filter(row => Object.values(row).some(v => v !== ""));
+    return row;
+  }).filter(r => Object.values(r).some(v => v !== ""));
+
+  return { headers, rows };
 }
 
 export async function POST(req: NextRequest) {
   try {
-    if (!API_KEY) return NextResponse.json({ error: "Gemini API key not configured" }, { status: 401 });
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: "GEMINI_API_KEY not set" }, { status: 401 });
+    }
 
-    const { query, conversation_history = [], csv_data } = await req.json();
-    if (!csv_data) return NextResponse.json({ error: "No data uploaded. Please upload a CSV file first." }, { status: 400 });
-    const data = csvToJson(csv_data);
-    const headers = Object.keys(data[0] || {});
-    const schema = headers.map(h => `- ${h}: sample = ${data.slice(0, 3).map(r => r[h]).join(", ")}`).join("\n");
+    const body = await req.json();
+    const { query, conversation_history = [], csv_data } = body;
 
-    let context = "";
+    if (!csv_data) {
+      return NextResponse.json(
+        { error: "No data uploaded yet. Please upload a CSV or Excel file first." },
+        { status: 400 }
+      );
+    }
+
+    const { headers, rows } = parseCSV(csv_data);
+
+    // build a schema string so gemini knows what columns exist
+    const schema = headers
+      .map(h => `${h}: ${rows.slice(0, 3).map(r => r[h]).join(" | ")}`)
+      .join("\n");
+
+    // include last few messages for follow-up context
+    let history = "";
     if (conversation_history.length > 0) {
-      context = "\n\nPrevious conversation:\n" + conversation_history.slice(-4)
-        .map((m: { role: string; content: string }) => `${m.role.toUpperCase()}: ${m.content}`)
+      history = "\n\nChat history:\n" + conversation_history
+        .slice(-4)
+        .map((m: { role: string; content: string }) => `${m.role}: ${m.content}`)
         .join("\n");
     }
 
-    const prompt = `${SYSTEM_PROMPT}\n\nDataset Schema:\n${schema}\n\nDataset (up to 100 rows):\n${JSON.stringify(data)}${context}\n\nUser Query: ${query}\n\nRespond with ONLY the JSON object.`;
+    const prompt = `${SYSTEM_PROMPT}
 
-    const response = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
-    const raw = response.text?.trim() || "";
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("No JSON in response");
+Schema:
+${schema}
 
-    return NextResponse.json({ success: true, data: JSON.parse(match[0]) });
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Unknown error";
+Data (${rows.length} rows):
+${JSON.stringify(rows)}
+${history}
+
+Question: ${query}`;
+
+    const res = await ai.models.generateContent({ model: MODEL, contents: prompt });
+    const raw = res.text?.trim() ?? "";
+
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("Gemini didn't return valid JSON");
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    return NextResponse.json({ success: true, data: parsed });
+
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "something went wrong";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
