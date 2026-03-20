@@ -124,7 +124,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg-primary)", position: "relative" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "var(--bg-primary)", position: "relative" }}>
       {/* Ambient background orbs */}
       <div
         style={{
@@ -142,11 +142,11 @@ export default function Home() {
           pointerEvents: "none", zIndex: 0,
         }}
       />
-      <div style={{ position: "relative", zIndex: 1, display: "flex", width: "100%", overflow: "hidden" }}>
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flex: 1, height: "100%", overflow: "hidden" }}>
         <Sidebar uploadedFile={uploadedFile} onUpload={handleUpload} onReset={handleReset} />
-        <div className="flex flex-col flex-1 overflow-hidden">
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
           <Header uploadedFile={uploadedFile} />
-          <div className="flex flex-1 overflow-hidden">
+          <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
             <ChatPanel messages={messages} loading={loading} onSendQuery={sendQuery} />
             <DashboardPanel dashboard={dashboard} loading={loading} />
           </div>
